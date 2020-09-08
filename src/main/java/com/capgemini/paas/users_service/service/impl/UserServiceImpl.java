@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public Optional<UserDTO> getUserById(long id) {
+		
 		Optional<User> user = userRepository.findById(id);
 		
 		Optional<UserDTO> userDto = Optional.empty();
@@ -73,7 +74,7 @@ public class UserServiceImpl implements UserService {
 			
 			userDto.getSkills().forEach(skillDto -> {
 				Skill skill = Skill.builder()
-						.id(skillDto.getSkillId())
+						.skillId(skillDto.getSkillId())
 						.name(skillDto.getName())
 						.priority(skillDto.getPriority())
 						.type(skillDto.getType())
@@ -82,7 +83,7 @@ public class UserServiceImpl implements UserService {
 				links.add(SkillUserLink.builder()
 						.skillUserLinkId(SkillUserLinkId.builder()
 								.userId(userDto.getUserId())
-								.skillId(skill.getId())
+								.skillId(skill.getSkillId())
 								.build())
 						.skill(skill)
 						.user(null)
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		User user = User.builder()
-			.id(userDto.getUserId())
+			.userId(userDto.getUserId())
 			.firstName(userDto.getFirstName())
 			.surname(userDto.getSurname())
 			.lastUpdatedSkills(userDto.getLastUpdatedSkills())
@@ -124,7 +125,7 @@ public class UserServiceImpl implements UserService {
 				Skill skill = link.getSkill();
 				
 				skillsDto.add(SkillDTO.builder()
-						.skillId(skill.getId())
+						.skillId(skill.getSkillId())
 						.name(skill.getName())
 						.type(skill.getType())
 						.priority(skill.getPriority())
@@ -135,7 +136,7 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		UserDTO userDto = UserDTO.builder()
-				.userId(user.getId())
+				.userId(user.getUserId())
 				.firstName(user.getFirstName())
 				.surname(user.getSurname())
 				.role(user.getRole())
@@ -157,7 +158,7 @@ public class UserServiceImpl implements UserService {
 			links.forEach(link -> {
 				
 				SkillUserLinkId linkId = SkillUserLinkId.builder()
-					.skillId(link.getSkill().getId())
+					.skillId(link.getSkill().getSkillId())
 					.userId(userDto.getUserId())
 					.build();
 				
@@ -167,24 +168,5 @@ public class UserServiceImpl implements UserService {
 			
 		}
 	}
-	
-//	public User mapToDao (UserDTO userDto) {
-//		
-//		List<SkillUserLink> link = new ArrayList<SkillUserLink>();
-//		
-//		if(userDto.getSkills() != null) {
-//			
-//			userDto.getSkills().forEach(skill -> {
-//				
-//				link.add(SkillUserLink.builder()
-//						.user(userDto)
-//						.skill(skill))
-//				
-//			});
-//		}
-//		
-//		return user;
-//
-//	}
 	
 }

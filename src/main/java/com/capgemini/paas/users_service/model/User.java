@@ -36,7 +36,7 @@ public class User implements ObjectValidator {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="USER_ID")
-	private long id;
+	private long userId;
 	
 	@Size(max=20)
 	@NotNull
@@ -56,6 +56,6 @@ public class User implements ObjectValidator {
 	@Column (name="LAST_UPDATED_SKILLS")
 	private String lastUpdatedSkills;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.REMOVE)
 	private List<SkillUserLink> skillUserLink;
 }

@@ -1,12 +1,12 @@
 package com.capgemini.paas.users_service.web.controller;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,18 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.capgemini.paas.users_service.model.User;
 import com.capgemini.paas.users_service.model.dto.UserDTO;
 import com.capgemini.paas.users_service.service.UserService;
-
-import com.capgemini.paas.services.errorhandling.persistence.DataNotFoundException;
-import com.capgemini.paas.services.errorhandling.web.BadRequestException;
-import com.capgemini.paas.users_service.model.Skill;
-import com.capgemini.paas.users_service.model.SkillUserLink;
-import com.capgemini.paas.users_service.model.SkillUserLinkId;
-import com.capgemini.paas.users_service.model.enums.Priority;
-import com.capgemini.paas.users_service.model.enums.Proficiency;
+import com.capgemini.paas.users_service.exception.BadRequestException;
+import com.capgemini.paas.users_service.exception.DataNotFoundException;
 import com.capgemini.paas.users_service.persistence.dao.SkillRepository;
 import com.capgemini.paas.users_service.persistence.dao.SkillUserLinkRepository;
 import com.capgemini.paas.users_service.persistence.dao.UserRepository;
-import com.capgemini.paas.services.commonutility.ServiceProperties;
 
 @RestController
 @RequestMapping("/skills-tracker/v1/users")
@@ -50,6 +43,7 @@ public class UserController {
 	     super();
 	}
 	
+	@CrossOrigin(origins = "http://localhost:8000")
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<List<UserDTO>> retrieveUsers() {
@@ -59,25 +53,26 @@ public class UserController {
 		if (users.size() == 0) {
 			throw new DataNotFoundException("No users exist");
 		} else {
-			return new ResponseEntity<List<UserDTO>>(users, ServiceProperties.generateBaggageHeaders(), HttpStatus.OK);
+			return new ResponseEntity<List<UserDTO>>(users, HttpStatus.OK);
 		}
 		
 	}
 	
+	@CrossOrigin(origins = "http://localhost:8000")
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<UserDTO> createSkill(@RequestBody User user) {
+	public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
 				
 		if(!user.validate()) {
 			throw new BadRequestException("Invalid input object.");
 		}
 		
-		skillRepository.save(Skill.builder()
-				.id(1)
-				.name("Java EE")
-				.priority(Priority.HIGH)
-				.type("Programming Language")
-				.build());
+//		skillRepository.save(Skill.builder()
+//				.skillId(1)
+//				.name("Java EE")
+//				.priority(Priority.HIGH)
+//				.type("Programming Language")
+//				.build());
 		
 //		userService.saveUser(user);
 //				
@@ -111,46 +106,63 @@ public class UserController {
 //						.build())
 //				));
 		
-		return new ResponseEntity<UserDTO>(userService.saveUser(user), ServiceProperties.generateBaggageHeaders(), HttpStatus.CREATED);
+		return new ResponseEntity<UserDTO>(userService.saveUser(user), HttpStatus.CREATED);
 	
 	}
 	
-	@RequestMapping(method = RequestMethod.PUT)
+	@CrossOrigin(origins = "http://localhost:8000")
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	@ResponseBody
-	public ResponseEntity<UserDTO> updateSkill(@RequestBody UserDTO user) {
+	public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO user, @PathVariable("id") long id) {
 		
-//		if(!userDTO.validate()) {
-//			throw new BadRequestException();
-//		}
-//		
-//		if (skills.size() == 0) {
-//			throw new DataNotFoundException("No skills exist");
-//		} else {
-		return new ResponseEntity<UserDTO>(userService.updateUser(user), ServiceProperties.generateBaggageHeaders(), HttpStatus.OK);
-//		}
-		
-	}
-	
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<UserDTO> retrieveUserBasedOnId(@PathVariable("id") long id) {
+		if(!user.validate()) {
+			throw new BadRequestException();
+		} else {
+			System.out.println("hit");
+		}
 		
 		Optional<UserDTO> userDto = userService.getUserById(id);
-		
+
 		if (!userDto.isPresent()) {
 			throw new DataNotFoundException("User not found for ID: " + id);
 		} else {
-			return new ResponseEntity<UserDTO>(userDto.get(), ServiceProperties.generateBaggageHeaders(), HttpStatus.OK);
+			return new ResponseEntity<UserDTO>(userService.updateUser(user), HttpStatus.OK);
 		}
 		
 	}
 	
+	@CrossOrigin(origins = "http://localhost:8000")
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<Optional<UserDTO>> retrieveUserBasedOnId(@PathVariable("id") long id) {
+		
+		Optional<UserDTO> userDto = userService.getUserById(id);
+		
+		System.out.println("hit");
+		System.out.println(userDto);
+		
+		if (!userDto.isPresent()) {
+			throw new DataNotFoundException("User not found for ID: " + id);
+		} else {
+			return new ResponseEntity<Optional<UserDTO>>(userDto, HttpStatus.OK);
+		}
+		
+	}
+	
+	@CrossOrigin(origins = "http://localhost:8000")
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
-	public void deleteUser(@PathVariable("id") long id) {
+	public HttpStatus deleteUser(@PathVariable("id") long id) {
 		
-		userService.deleteUser(id);
-		
+		Optional<UserDTO> userDto = userService.getUserById(id);
+				
+		if (!userDto.isPresent()) {
+			throw new DataNotFoundException("User not found for ID: " + id);
+		} else {
+			userService.deleteUser(id);
+			return HttpStatus.OK;
+		}
+				
 	}
 
 }

@@ -13,8 +13,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.WebApplicationInitializer;
 
-import com.capgemini.paas.services.commonutility.ServiceProperties;
-
 @Configuration
 @EnableAspectJAutoProxy
 @SpringBootApplication(scanBasePackages = {"com.capgemini.paas.users_service"})
@@ -33,22 +31,5 @@ public class UserApplication extends SpringBootServletInitializer implements Web
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(applicationClass);
     }
-	
-	@Bean
-	CommandLineRunner init() {
-		return args -> {
-			
-			// Add any environment variables that are required in the application here
-			// e.g. ServiceProperties.addEnvironmentProperty("USERNAME");
-			// ServiceProperties can be referenced in a static context to retrieve properties
-			// e.g. ServiceProperties.getEnvironmentProperty("USERNAME");
-			
-			// containsNullValues throws an exception if NULL values are found for any environment
-			// variables added to the HashMap above - This is used to verify the variables before 
-			// the service starts and then subsequently fails because they are missing
-			ServiceProperties.containsNullValues();
-			
-		};
-	}
 	
 }
